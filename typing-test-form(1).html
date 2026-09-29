@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Typing speed check – XOX Contact Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --paper:#F4F5F7; --surface:#FFFFFF; --ink:#1B2233; --muted:#5B6477;
+  --line:#D9DDE5; --keyedge:#C3C9D4; --accent:#0E6E6B; --accent-ink:#FFFFFF;
+  --pass:#1E7A46; --short:#A4461B; --error-bg:#FBECE7;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#141922; --surface:#1C2230; --ink:#E8EBF1; --muted:#9AA3B5;
+    --line:#2D3546; --keyedge:#3A4459; --accent:#3FB3AD; --accent-ink:#0B1414;
+    --pass:#5CC98A; --short:#F0A070; --error-bg:#3A2420;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:Lexend,"Segoe UI",Roboto,Arial,sans-serif;font-weight:400;line-height:1.55;font-size:16px}
+.wrap{max-width:620px;margin:0 auto;padding:40px 20px 64px}
+.org{font-size:.875rem;color:var(--muted);margin:0 0 6px}
+h1{font-size:2.1rem;line-height:1.15;font-weight:600;margin:0 0 12px;letter-spacing:-.01em}
+h1 .caret{display:inline-block;width:3px;height:1.9rem;background:var(--accent);margin-left:4px;vertical-align:-4px;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){h1 .caret{animation:none}}
+.lede{color:var(--muted);margin:0 0 32px;max-width:52ch}
+section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;margin-bottom:16px}
+h2{font-size:1.15rem;font-weight:600;margin:0 0 16px;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-size:.9rem;color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums}
+ol.steps{margin:0 0 18px;padding-left:20px;color:var(--ink)}
+ol.steps li{margin-bottom:6px}
+.btn-link{display:inline-block;background:transparent;color:var(--accent);border:1.5px solid var(--accent);border-radius:8px;padding:10px 16px;text-decoration:none;font-weight:500}
+.btn-link:hover{background:var(--accent);color:var(--accent-ink)}
+.field{margin-bottom:18px}
+.field:last-child{margin-bottom:0}
+label,.label{display:block;font-weight:500;margin-bottom:6px;font-size:.95rem}
+.hint{font-size:.85rem;color:var(--muted);margin-top:4px}
+input[type=text],input[type=date],select{width:100%;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.row{grid-template-columns:1fr}}
+.radios{display:flex;gap:10px;flex-wrap:wrap}
+.radios label{display:flex;align-items:center;gap:8px;font-weight:400;border:1px solid var(--line);border-radius:8px;padding:9px 14px;margin:0;cursor:pointer}
+.radios input{accent-color:var(--accent)}
+/* keycap result inputs: the one bold element */
+.keys{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.key{background:var(--paper);border:1px solid var(--keyedge);border-radius:12px;box-shadow:0 4px 0 var(--keyedge);padding:14px 16px 12px;transition:transform .08s,box-shadow .08s}
+.key:focus-within{transform:translateY(2px);box-shadow:0 2px 0 var(--accent);border-color:var(--accent)}
+.key label{font-size:.85rem;color:var(--muted);font-weight:400;margin:0}
+.key .big{display:flex;align-items:baseline;gap:6px}
+.key input{width:100%;min-width:0;font:inherit;font-size:2.6rem;font-weight:600;line-height:1.1;border:0;background:transparent;color:var(--ink);padding:2px 0;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.key input::-webkit-outer-spin-button,.key input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.key input:focus{outline:none}
+.key .unit{font-size:1rem;color:var(--muted)}
+.status{font-size:.95rem;padding:10px 12px;border-radius:8px;background:var(--paper);color:var(--muted)}
+.status.ok{color:var(--pass)}
+.status.low{color:var(--short)}
+input[type=file]{font:inherit;font-size:.9rem;width:100%}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400}
+.check input{margin-top:5px;accent-color:var(--accent)}
+.submit{width:100%;font:inherit;font-weight:600;font-size:1.05rem;background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:14px;cursor:pointer;margin-top:8px}
+.submit:disabled{opacity:.6;cursor:progress}
+.error{background:var(--error-bg);color:var(--short);border-radius:8px;padding:12px 14px;margin:12px 0 0;display:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.done{display:none;text-align:left}
+.done h2{font-size:1.5rem}
+.summary{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:16px 0 22px}
+.summary dt{color:var(--muted)}
+.summary dd{margin:0;font-weight:500}
+.config-warn{background:var(--error-bg);color:var(--short);border-radius:8px;padding:12px 14px;margin-bottom:16px;display:none}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="org">XOX Contact Centre</p>
+  <h1>Typing speed check<span class="caret" aria-hidden="true"></span></h1>
+  <p class="lede">WhatsApp livechat is coming soon, and chat work depends on fast, accurate typing. Take a short test, then record your result here.</p>
+
+  <div class="config-warn" id="configWarn">This form isn't connected yet. Add the Supabase URL and anon key in the CONFIG section of the file.</div>
+
+  <form id="form" novalidate>
+    <section>
+      <h2><span class="n">1</span>Take the test</h2>
+      <ol class="steps">
+        <li>Open typingtest.com and choose the <strong><span class="durText"></span>-minute</strong> test.</li>
+        <li>Type the passage until the timer ends. Don't pause or restart midway.</li>
+        <li>Screenshot the result page so your speed and accuracy are both visible.</li>
+      </ol>
+      <a class="btn-link" href="https://www.typingtest.com/" target="_blank" rel="noopener">Open typingtest.com</a>
+    </section>
+
+    <section>
+      <h2><span class="n">2</span>Your details</h2>
+      <div class="field">
+        <label for="fullName">Full name</label>
+        <input type="text" id="fullName" autocomplete="name" required>
+      </div>
+      <div class="row field">
+        <div>
+          <label for="staffId">Staff ID</label>
+          <input type="text" id="staffId" required>
+        </div>
+        <div>
+          <label for="role">Role</label>
+          <select id="role" required>
+            <option value="">Select</option>
+            <option>Agent</option>
+            <option>Team Leader</option>
+            <option>QA</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Employed by</span>
+        <div class="radios" role="radiogroup">
+          <label><input type="radio" name="employment" value="XOX"> XOX (direct)</label>
+          <label><input type="radio" name="employment" value="PERSOLKELLY"> PERSOLKELLY</label>
+        </div>
+      </div>
+      <div class="field">
+        <label for="teamLeader">Team Leader</label>
+        <select id="teamLeader" required><option value="">Select</option></select>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="n">3</span>Your result</h2>
+      <div class="row field">
+        <div>
+          <label for="testDate">Test date</label>
+          <input type="date" id="testDate" required>
+        </div>
+        <div>
+          <label for="duration">Test length</label>
+          <select id="duration" required></select>
+        </div>
+      </div>
+      <div class="keys">
+        <div class="key">
+          <label for="wpm">Speed</label>
+          <div class="big"><input type="number" id="wpm" inputmode="numeric" min="0" max="250" placeholder="0" required><span class="unit">WPM</span></div>
+        </div>
+        <div class="key">
+          <label for="accuracy">Accuracy</label>
+          <div class="big"><input type="number" id="accuracy" inputmode="decimal" min="0" max="100" step="0.1" placeholder="0" required><span class="unit">%</span></div>
+        </div>
+      </div>
+      <p class="status" id="status" aria-live="polite"></p>
+      <div class="field" style="margin-top:18px">
+        <label for="shot">Result screenshot</label>
+        <input type="file" id="shot" accept="image/*" required>
+        <p class="hint">PNG or JPG, up to 5 MB.</p>
+      </div>
+      <div class="field">
+        <label class="check"><input type="checkbox" id="declare" required> I took this test myself, without help, and the numbers above match my screenshot.</label>
+      </div>
+    </section>
+
+    <button class="submit" id="submitBtn" type="submit">Submit result</button>
+    <p class="error" id="error" role="alert"></p>
+  </form>
+
+  <section class="done" id="done">
+    <h2>Result submitted</h2>
+    <p id="doneMsg"></p>
+    <dl class="summary" id="summary"></dl>
+    <button class="btn-link" type="button" id="againBtn">Submit another attempt</button>
+  </section>
+</main>
+
+<script>
+/* ============ CONFIG ============ */
+const CONFIG = {
+  SUPABASE_URL: "https://jrfiyliesitsgnehxqtv.supabase.co",
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpyZml5bGllc2l0c2duZWh4cXR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2ODAwNjAsImV4cCI6MjA5NTI1NjA2MH0.ZO-4OYF9_1NRduLZlKiSVStOfg07W4Ozx7vhvUTuozA",
+  TABLE: "typing_test_results",
+  BUCKET: "typing-test-screenshots",
+  PASS_WPM: 35,          // minimum speed
+  PASS_ACCURACY: 90,     // minimum accuracy %
+  REQUIRED_DURATION: 3,  // minutes staff should select on typingtest.com
+  DURATIONS: [1, 2, 3, 5, 10],
+  TEAM_LEADERS: ["Asriza Anwar", "Intan Ardina", "Saputra Hanim", "Syahrul Nizam (Outbound)", "Other"],
+  MAX_FILE_MB: 5
+};
+/* ================================ */
+
+const $ = id => document.getElementById(id);
+const configured = !CONFIG.SUPABASE_URL.includes("YOUR-PROJECT") && !CONFIG.SUPABASE_ANON_KEY.includes("YOUR-");
+const sb = configured ? supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY) : null;
+if (!configured) $("configWarn").style.display = "block";
+
+document.querySelectorAll(".durText").forEach(el => el.textContent = CONFIG.REQUIRED_DURATION);
+CONFIG.DURATIONS.forEach(d => {
+  const o = document.createElement("option");
+  o.value = d; o.textContent = d + (d === 1 ? " minute" : " minutes");
+  if (d === CONFIG.REQUIRED_DURATION) o.selected = true;
+  $("duration").appendChild(o);
+});
+CONFIG.TEAM_LEADERS.forEach(n => {
+  const o = document.createElement("option"); o.value = n; o.textContent = n;
+  $("teamLeader").appendChild(o);
+});
+const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+$("testDate").value = today();
+$("testDate").max = today();
+
+function evaluate() {
+  const w = parseFloat($("wpm").value), a = parseFloat($("accuracy").value);
+  const s = $("status");
+  if (isNaN(w) || isNaN(a)) {
+    s.className = "status";
+    s.textContent = `Target: ${CONFIG.PASS_WPM} WPM and ${CONFIG.PASS_ACCURACY}% accuracy.`;
+    return null;
+  }
+  const pass = w >= CONFIG.PASS_WPM && a >= CONFIG.PASS_ACCURACY;
+  if (pass) {
+    s.className = "status ok";
+    s.textContent = `Meets the target of ${CONFIG.PASS_WPM} WPM and ${CONFIG.PASS_ACCURACY}% accuracy.`;
+  } else {
+    const gaps = [];
+    if (w < CONFIG.PASS_WPM) gaps.push(`${CONFIG.PASS_WPM - w} WPM short on speed`);
+    if (a < CONFIG.PASS_ACCURACY) gaps.push(`${(CONFIG.PASS_ACCURACY - a).toFixed(1)}% short on accuracy`);
+    s.className = "status low";
+    s.textContent = `Below target (${gaps.join(", ")}). You can still submit, or retake the test first.`;
+  }
+  return pass;
+}
+$("wpm").addEventListener("input", evaluate);
+$("accuracy").addEventListener("input", evaluate);
+evaluate();
+
+function showError(msg) { const e = $("error"); e.textContent = msg; e.style.display = "block"; }
+function clearError() { $("error").style.display = "none"; }
+
+$("form").addEventListener("submit", async ev => {
+  ev.preventDefault(); clearError();
+  if (!configured) return showError("This form isn't connected to the database yet. Please inform your Team Leader.");
+
+  const fullName = $("fullName").value.trim();
+  const staffId = $("staffId").value.trim();
+  const role = $("role").value;
+  const employment = (document.querySelector('input[name="employment"]:checked') || {}).value;
+  const teamLeader = $("teamLeader").value;
+  const wpm = parseInt($("wpm").value, 10);
+  const accuracy = parseFloat($("accuracy").value);
+  const file = $("shot").files[0];
+
+  if (!fullName || !staffId) return showError("Enter your full name and staff ID.");
+  if (!role || !employment || !teamLeader) return showError("Choose your role, employer and Team Leader.");
+  if (isNaN(wpm) || wpm < 0 || wpm > 250) return showError("Enter your speed as a number between 0 and 250.");
+  if (isNaN(accuracy) || accuracy < 0 || accuracy > 100) return showError("Enter your accuracy as a number between 0 and 100.");
+  if (!file) return showError("Attach a screenshot of your result page.");
+  if (!file.type.startsWith("image/")) return showError("The screenshot must be an image file (PNG or JPG).");
+  if (file.size > CONFIG.MAX_FILE_MB * 1024 * 1024) return showError(`The screenshot is larger than ${CONFIG.MAX_FILE_MB} MB. Crop it or save it as JPG.`);
+  if (!$("declare").checked) return showError("Tick the declaration to confirm this is your own attempt.");
+
+  const passed = evaluate();
+  const btn = $("submitBtn"); btn.disabled = true; btn.textContent = "Submitting…";
+
+  try {
+    const safeId = staffId.replace(/[^A-Za-z0-9_-]/g, "_");
+    const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const path = `${safeId}/${Date.now()}.${ext}`;
+    const up = await sb.storage.from(CONFIG.BUCKET).upload(path, file, { upsert: false, contentType: file.type });
+    if (up.error) throw new Error("Screenshot upload failed: " + up.error.message);
+
+    const { error } = await sb.from(CONFIG.TABLE).insert({
+      full_name: fullName, staff_id: staffId, role, employment, team_leader: teamLeader,
+      test_date: $("testDate").value, duration_min: parseInt($("duration").value, 10),
+      wpm, accuracy, passed, screenshot_path: path, declared: true
+    });
+    if (error) throw new Error("Saving the result failed: " + error.message);
+
+    $("doneMsg").textContent = passed
+      ? "Thank you. Your result meets the target."
+      : "Thank you. Your result is below target this time. You may retake the test and submit again.";
+    $("summary").innerHTML = "";
+    [["Name", fullName], ["Staff ID", staffId], ["Speed", wpm + " WPM"], ["Accuracy", accuracy + "%"], ["Test length", $("duration").value + " min"]]
+      .forEach(([k, v]) => { const dt = document.createElement("dt"); dt.textContent = k; const dd = document.createElement("dd"); dd.textContent = v; $("summary").append(dt, dd); });
+    $("form").style.display = "none";
+    $("done").style.display = "block";
+    window.scrollTo({ top: 0 });
+  } catch (err) {
+    showError(err.message + " Please try again, or inform your Team Leader if it keeps happening.");
+  } finally {
+    btn.disabled = false; btn.textContent = "Submit result";
+  }
+});
+
+$("againBtn").addEventListener("click", () => {
+  ["wpm", "accuracy"].forEach(id => $(id).value = "");
+  $("shot").value = ""; $("declare").checked = false; $("testDate").value = today();
+  evaluate();
+  $("done").style.display = "none"; $("form").style.display = "block";
+  window.scrollTo({ top: 0 });
+});
+</script>
+</body>
+</html>
